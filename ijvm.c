@@ -1,11 +1,11 @@
 #include <stdlib.h> 	/* for malloc and atoi */
-#include <stdio.h>      /* for FILE, fgetc, fputc, stdin, stdout, 
+#include <stdio.h>      /* for FILE, fgetc, fputc, stdin, stdout,
                          * fprintf, printf, fopen and fscanf */
 #include <time.h>   	/* for time_t, time and ctime */
 #include "ijvm-util.h"
 
 typedef struct IJVM IJVM;
-struct IJVM 
+struct IJVM
 {
   uint32 sp, lv, pc, wide;
   int32 *stack;
@@ -166,7 +166,7 @@ ijvm_execute_opcode (IJVM *i)
   case IJVM_OPCODE_GOTO:
     /* Fetch the next 2 bytes interpreted as a signed 16 bit offset
      * and add this to pc. */
-    offset = ijvm_fetch_int16 (i); 
+    offset = ijvm_fetch_int16 (i);
     i->pc = opc + offset;
     break;
 
@@ -221,17 +221,17 @@ ijvm_execute_opcode (IJVM *i)
   case IJVM_OPCODE_INVOKEVIRTUAL:
     index = ijvm_fetch_uint16 (i);
     ijvm_invoke_virtual (i, index);
-    break; 
-    
+    break;
+
   case IJVM_OPCODE_IOR:
     a = ijvm_pop (i);
     b = ijvm_pop (i);
     ijvm_push (i, a | b);
     break;
-    
+
   case IJVM_OPCODE_IRETURN:
     ijvm_ireturn (i);
-    break; 
+    break;
 
   case IJVM_OPCODE_ISTORE:
     if (i->wide)
@@ -269,7 +269,7 @@ ijvm_execute_opcode (IJVM *i)
     i->wide = TRUE;
     break;
   }
-  
+
   if (opcode != IJVM_OPCODE_WIDE)
     i->wide = FALSE;
 }
@@ -321,7 +321,7 @@ ijvm_new (IJVMImage *image, int argc, char *argv[])
   memcpy (i->cpp, image->cpool, image->cpool_size * sizeof (int32));
 
   main_offset = i->cpp[image->main_index];
-  /* Number of arguments to main */  
+  /* Number of arguments to main */
   nargs = i->method[main_offset] * 256 + i->method[main_offset + 1];
 
   /* Dont count argv[0], argv[1] or obj. ref. */
@@ -337,7 +337,7 @@ ijvm_new (IJVMImage *image, int argc, char *argv[])
       printf ("Invalid argument to main method: `%s'\n", argv[j + 2]);
       exit (-1);
     }
-  }      
+  }
 
   /* Initialize the IJVM by simulating a call to main */
   ijvm_invoke_virtual (i, image->main_index);
@@ -345,7 +345,7 @@ ijvm_new (IJVMImage *image, int argc, char *argv[])
   return i;
 }
 
-int 
+int
 main (int argc, char *argv[])
 {
   FILE *file;
@@ -400,13 +400,13 @@ main (int argc, char *argv[])
    * are printed. */
 
   if (verbose)
-    ijvm_print_stack (i->stack + i->sp, MIN (i->sp - i->initial_sp, 8), TRUE);
+    ijvm_print_stack (i->stack + i->sp, MIN (i->sp - i->initial_sp, 32), TRUE);
   while (ijvm_active (i)) {
     if (verbose)
       ijvm_print_snapshot (i->method + i->pc);
     ijvm_execute_opcode (i);
     if (verbose)
-      ijvm_print_stack (i->stack + i->sp, MIN (i->sp - i->initial_sp, 8), FALSE);
+      ijvm_print_stack (i->stack + i->sp, MIN (i->sp - i->initial_sp, 32), FALSE);
   }
 
   ijvm_print_result (i);

@@ -14,7 +14,7 @@
 static IJVMSpec *ijvm_spec;
 
 
-IJVMImage *ijvm_image_new (uint16 main_index, 
+IJVMImage *ijvm_image_new (uint16 main_index,
 			   uint8 *method_area, uint32 method_area_size,
 			   int32 *cpool, uint32 cpool_size)
 {
@@ -48,7 +48,7 @@ ijvm_image_load (FILE *file)
     exit (-1);
   }
   image->main_index = main_index;
-    
+
   fields = fscanf (file, "method area: %d bytes\n", &method_area_size);
   if (fields == 0) {
     printf ("Bytecode file not recognized\n");
@@ -170,7 +170,7 @@ ijvm_print_stack (int32 *stack, int length, int indent)
   if (indent)
     fill (32);
 
-  printf ("stack = ");
+  printf ("stack (l: %d) = ",length);
   for (i = 0, sp = stack; i < length; i++, sp--)
     if (i == length - 1)
       printf ("%d", *sp);
@@ -207,7 +207,7 @@ ijvm_print_snapshot (uint8 *opcodes)
   opcode = opcodes[0];
   tmpl = ijvm_spec_lookup_template_by_opcode (ijvm_spec, opcode);
   if (tmpl == NULL) {
-    printf ("unknown opcode: 0x%02x\n", opcode); 
+    printf ("unknown opcode: 0x%02x\n", opcode);
     return;
   }
 
@@ -217,7 +217,7 @@ ijvm_print_snapshot (uint8 *opcodes)
   for (j = 0; j < tmpl->noperands; j++) {
     if (j > 0)
       length += printf (", ");
-    
+
     switch (tmpl->operands[j]) {
     case IJVM_OPERAND_BYTE:
       sbyte = opcodes[index];
