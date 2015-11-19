@@ -24,5 +24,7 @@ or:
 
 5b: copy `ijvm` and `ijvm-asm` to a path that is in `$PATH`
 
-##You can copy the precompiled binaries to a path of your choice.. see [This reddit comment](https://www.reddit.com/r/dComArk/comments/3qyfin/it2/cx4d8rm) (in danish) for instructions on installing it on a fresh horse.
+##Not able to build it yourself?
+
+You can copy the precompiled binaries to a path of your choice.. see [This reddit comment](https://www.reddit.com/r/dComArk/comments/3qyfin/it2/cx4d8rm) (in danish) for instructions on installing it on a fresh horse.
 
