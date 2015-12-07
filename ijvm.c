@@ -285,10 +285,35 @@ ijvm_active (IJVM *i)
   return i->pc != IJVM_INITIAL_PC;
 }
 
+//FROM: http://stackoverflow.com/a/3974138
+//assumes little endian
+void
+printBits(size_t const size, void const * const ptr)
+{
+    unsigned char *b = (unsigned char*) ptr;
+    unsigned char byte;
+    int i, j;
+
+    for (i=size-1;i>=0;i--)
+    {
+        for (j=7;j>=0;j--)
+        {
+            byte = b[i] & (1<<j);
+            byte >>= j;
+            if(j==3) printf(" ");
+            if(j==7) printf("  ");
+            printf("%u", byte);
+        }
+    }
+    puts("");
+}
+
 void
 ijvm_print_result (IJVM *i)
 {
   printf ("return value: %d\n", i->stack[i->sp]);
+  printf ("in binary: ");
+  printBits(4,&i->stack[i->sp]);
 }
 
 /* Initialize a new IJVM interpreter given a bytecode image.  The
