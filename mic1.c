@@ -133,7 +133,7 @@ mic1_active (Mic1 *m)
 
   /* Note: m->mir isn't valid here, since we test this before the cycle */
 
-  b_bus = mic1_word_get_bits (m->control_store[m->mpc], 
+  b_bus = mic1_word_get_bits (m->control_store[m->mpc],
 			      MIC1_WORD_B_BUS_OFFSET,
 			      MIC1_WORD_B_BUS_SIZE);
 
@@ -184,7 +184,7 @@ mic1_read_b_bus (Mic1 *m)
   }
 }
 
-int 
+int
 mic1_alu (int alu_bits, int h, int b_bus)
 {
   switch (alu_bits) {
@@ -197,7 +197,7 @@ mic1_alu (int alu_bits, int h, int b_bus)
 
   case MIC1_ALU_INV_H:
     return ~h;
-   
+
   case MIC1_ALU_INV_B_BUS:
     return ~b_bus;
 
@@ -215,28 +215,28 @@ mic1_alu (int alu_bits, int h, int b_bus)
 
   case MIC1_ALU_SUB_B_BUS_H:
     return b_bus - h;
-    
+
   case MIC1_ALU_SUB_B_BUS_1:
     return b_bus - 1;
-    
+
   case MIC1_ALU_NEG_H:
     return -h;
-    
+
   case MIC1_ALU_H_AND_B_BUS:
     return h & b_bus;
-    
+
   case MIC1_ALU_H_OR_B_BUS:
     return h | b_bus;
-    
+
   case MIC1_ALU_0:
     return 0;
-    
+
   case MIC1_ALU_1:
     return 1;
 
   case MIC1_ALU_MINUS_1:
     return -1;
-    
+
   default:
     return random ();
   }
@@ -300,8 +300,8 @@ mic1_cycle (Mic1 *m)
 
   m->mir = m->control_store[m->mpc];
 
-  alu_bits = mic1_word_get_bits (m->mir, 
-				 MIC1_WORD_ALU_OFFSET, 
+  alu_bits = mic1_word_get_bits (m->mir,
+				 MIC1_WORD_ALU_OFFSET,
 				 MIC1_WORD_ALU_SIZE);
 
   /* Drive H and B bus (Subcycle 2). */
@@ -312,7 +312,7 @@ mic1_cycle (Mic1 *m)
   /* B bus and H stable, next up is ALU and shifter (Subcycle 3). */
 
   res = mic1_alu (alu_bits, m->h, b_bus);
-  
+
   if (mic1_word_get_bit (m->mir, MIC1_WORD_SRA1_BIT)) {
     if (res < 0)
       res = ~(~res >> 1);
@@ -323,7 +323,7 @@ mic1_cycle (Mic1 *m)
     res = res << 8;
 
   /* Rising edge of clock: load registers from C bus and MBR/MDR from
-   * memory if previous cycle initiated a fetch/rd. 
+   * memory if previous cycle initiated a fetch/rd.
    */
 
   if (m->doing_rd) {
@@ -348,7 +348,7 @@ mic1_cycle (Mic1 *m)
   /* Initiate memory operations, if any, now that MAR and PC has been
    * loaded. */
 
-  if (mic1_word_get_bit (m->mir, MIC1_WORD_WRITE_BIT) && 
+  if (mic1_word_get_bit (m->mir, MIC1_WORD_WRITE_BIT) &&
       0 <= m->mar && m->mar < IJVM_MEMORY_SIZE / 4)
     m->word_store[m->mar] = m->mdr;
 
@@ -366,7 +366,7 @@ mic1_cycle (Mic1 *m)
    * (eg. H = MBR << 8), but for goto (MBR), it's available in cycle
    * k+1.
    */
-  
+
   address = mic1_word_get_bits (m->mir, MIC1_WORD_ADDRESS_OFFSET,
 				MIC1_WORD_ADDRESS_SIZE);
   if (mic1_word_get_bit (m->mir, MIC1_WORD_JAMZ_BIT) && z_bit)
@@ -402,7 +402,7 @@ mic1_new (Mic1Image *mic1_image, IJVMImage *ijvm_image,
 
     m->stack_base = m->sp;
 
-    memcpy (m->byte_store, ijvm_image->method_area, 
+    memcpy (m->byte_store, ijvm_image->method_area,
 	    ijvm_image->method_area_size);
     memcpy (m->word_store + m->cpp, ijvm_image->cpool,
 	    ijvm_image->cpool_size * sizeof (int32));
@@ -416,11 +416,11 @@ mic1_new (Mic1Image *mic1_image, IJVMImage *ijvm_image,
 	printf ("Invalid argument to main method: `%s'\n", argv[i]);
 	exit (-1);
       }
-    }      
+    }
   }
 
   m->mpc = mic1_image->entry;
-  memcpy (m->control_store, mic1_image->control_store, 
+  memcpy (m->control_store, mic1_image->control_store,
 	  sizeof (m->control_store));
 
   m->doing_rd = FALSE;
@@ -429,7 +429,32 @@ mic1_new (Mic1Image *mic1_image, IJVMImage *ijvm_image,
   return m;
 }
 
-int 
+//FROM: http://stackoverflow.com/a/3974138
+//assumes little endian
+void
+printBits(size_t const size, void const * const ptr)
+{
+    unsigned char *b = (unsigned char*) ptr;
+    unsigned char byte;
+    int i, j;
+
+    for (i=size-1;i>=0;i--)
+    {
+        for (j=7;j>=0;j--)
+        {
+            byte = b[i] & (1<<j);
+            byte >>= j;
+            if(j==3) printf(" ");
+            if(j==7) printf("  ");
+            printf("%u", byte);
+        }
+    }
+    puts("");
+}
+
+
+
+int
 main (int argc, char *argv[])
 {
   FILE *mic1_file, *ijvm_file;
@@ -484,11 +509,11 @@ main (int argc, char *argv[])
     }
 
     if (strcmp (argv[1], "-v") == 0) {
-      printf ("mic1 version " VERSION " compiled " 
+      printf ("mic1 version " VERSION " compiled "
 	      COMPILE_DATE " on " COMPILE_HOST "\n");
       printf ("Default specification file is " IJVM_DATADIR "/ijvm.spec\n");
       exit (0);
-    }    
+    }
     break;
   }
 
@@ -505,7 +530,7 @@ main (int argc, char *argv[])
     fprintf (stderr, "except one; the simulator will pass the initial object reference for you.\n");
     exit (-1);
   }
-    
+
   if (strcmp (argv[1], "-") == 0)
     mic1_file = stdin;
   else {
@@ -571,5 +596,8 @@ main (int argc, char *argv[])
   }
 
   printf ("return value: %d\n", m->tos);
+    printf ("in binary: ");
+  printBits(4,&m->tos);
+
   return 0;
 }
